@@ -1,0 +1,5 @@
+subject_id,Index,Timestamp (YYYY-MM-DDThh:mm:ss),Event Type,Event Subtype,Patient Info,Device Info,Source Device ID,Glucose Value (mmol/L),Insulin Value (u),Carb Value (grams)
+,1,,FirstName,,S-1001,,,,,
+S-1001,12,2024-06-01T08:00:00,EGV,,,Dexcom G7,synth-device,6.1,,
+S-1001,13,2024-06-01T08:05:00,EGV,,,Dexcom G7,synth-device,6.4,,
+S-1001,14,2024-06-01T08:10:00,EGV,,,Dexcom G7,synth-device,5.9,1.5,12

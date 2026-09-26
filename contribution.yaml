@@ -1,0 +1,38 @@
+# Test contract + live-run sample for this module.
+# Automated tests and in-app Run / ./run.sh use the tiny synthetic fixtures
+# below. They follow the column layout of these Kaggle exports — do not copy
+# those downloads into git (they can contain real names and device serials):
+#   https://www.kaggle.com/datasets/mauddib/dexcom-sensor-data
+#   https://www.kaggle.com/datasets/reneelinmedical/glucose-readings-from-cgm
+
+slug: w4h-glucose-monitor-csv-file-importer
+kind: ingest
+publisher: usc-infolab
+
+tests:
+  automated:
+    command: pytest tests/ -q -m "not integration"
+    sample:
+      kind: fixtures
+      path: tests/fixtures
+
+  live:
+    command: ./run.sh import
+    sample:
+      kind: fixtures
+      path: tests/fixtures
+      files:
+        - dexcom_clarity.csv
+        - freestyle_libre.csv
+
+inputs:
+  - key: dataset_id
+    type: dataset
+    create: empty
+  - key: dataset_title
+    type: text
+    default: Glucose monitor file-importer test
+    override: true
+  - key: files
+    type: files
+    required: false
