@@ -36,3 +36,4 @@ inputs:
   - key: files
     type: files
     required: false
+    summary: A Dexcom Clarity or FreeStyle LibreLink CSV export.
