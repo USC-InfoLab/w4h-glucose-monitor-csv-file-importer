@@ -76,7 +76,10 @@ def import_signal(
     signal_count: int = 1,
 ) -> dict:
     slug = signal["slug"]
-    csv_path = (csv_path or Path(data_dir) / Path(signal["file"]).name).resolve()
+    if csv_path is None:  # planned folder drop: relative path; older manifests: bare name
+        nested = Path(data_dir) / signal["file"]
+        csv_path = nested if nested.is_file() else Path(data_dir) / Path(signal["file"]).name
+    csv_path = csv_path.resolve()
     if not csv_path.is_file():
         raise FileNotFoundError(f"CSV missing for signal {slug!r}: {csv_path}")
 

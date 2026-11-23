@@ -56,7 +56,7 @@ def detect_delimiter(header_line: str) -> str:
     return max(DELIMITERS, key=lambda d: header_line.count(d))
 
 
-def profile_csv(path: Path) -> dict:
+def profile_csv(path: Path, name: str | None = None) -> dict:
     """Header, delimiter and inferred types from the first PREVIEW_ROWS data rows."""
     with Path(path).open(newline="", encoding="utf-8-sig") as f:
         first = f.readline()
@@ -76,7 +76,7 @@ def profile_csv(path: Path) -> dict:
         infer_type([row[i] if i < len(row) else "" for row in preview]) for i in range(len(headers))
     ]
     return {
-        "name": Path(path).name,
+        "name": name or Path(path).name,
         "delimiter": delimiter,
         "headers": headers,
         "inferred_types": inferred,

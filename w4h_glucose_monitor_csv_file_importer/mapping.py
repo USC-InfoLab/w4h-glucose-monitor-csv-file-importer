@@ -35,7 +35,7 @@ _SKIP_DIRS = {"fixtures", "data", "e4", "tests", "csv", "raw", "dataset", "tmp"}
 
 def slug_from_filename(name: str) -> str:
     """Signal slug from the file stem. Must be a SQL identifier (csv-batch uses it as a table name)."""
-    stem = re.sub(r"\.[^./]+$", "", str(name or "")).lower()
+    stem = re.sub(r"\.[^./]+$", "", Path(str(name or "")).name).lower()
     stem = re.sub(r"[_-]?merged$", "", stem)
     stem = re.sub(r"[^a-z0-9]+", "_", stem).strip("_")
     if stem[:1].isdigit():
@@ -200,7 +200,7 @@ def build_manifest(profiles: list[dict]) -> dict:
     return manifest
 
 
-def plan_files(csv_files: list[Path]) -> dict:
+def plan_files(csv_files: list[Path], data_dir: Path | None = None) -> dict:
     """Profile the given CSVs (in list order) and return a draft manifest (nothing written)."""
     paths = [Path(p) for p in csv_files]
     missing = [str(p) for p in paths if not p.is_file()]
@@ -208,7 +208,8 @@ def plan_files(csv_files: list[Path]) -> dict:
         raise FileNotFoundError("CSV file(s) not found:\n  " + "\n  ".join(missing))
     if not paths:
         raise FileNotFoundError("No .csv files to plan")
-    profiles = [profile_csv(p) for p in paths]
+    # With data_dir (an in-app folder drop), each signal's file is its path relative to data_dir.
+    profiles = [profile_csv(p, name=str(p.relative_to(data_dir)) if data_dir else None) for p in paths]
     empty = [p["name"] for p in profiles if not p["headers"]]
     if empty:
         raise ValueError(f"Empty or headerless CSV file(s): {', '.join(empty)}")
@@ -216,8 +217,11 @@ def plan_files(csv_files: list[Path]) -> dict:
 
 
 def plan_directory(data_dir: Path) -> dict:
-    """Profile every *.csv in data_dir and return a draft manifest (nothing written)."""
-    csv_files = sorted(Path(data_dir).glob("*.csv"))
+    """Profile every *.csv under data_dir (a dropped folder keeps its sub-folders); skip hidden paths."""
+    root = Path(data_dir)
+    csv_files = sorted(
+        p for p in root.rglob("*.csv") if not any(part.startswith(".") for part in p.relative_to(root).parts)
+    )
     if not csv_files:
         raise FileNotFoundError(f"No .csv files found in {data_dir}")
-    return plan_files(csv_files)
+    return plan_files(csv_files, data_dir=root)
